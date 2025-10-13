@@ -26,12 +26,14 @@
       "edgeToEdgeEnabled": true,
       "splash": {
         "image": "./assets/images/splash.png"
-      }
+      },
+      "package": "com.sudhanshu30602.expoRouterTV"
     },
     "ios": {
       "splash": {
         "image": "./assets/images/splash.png"
-      }
+      },
+      "bundleIdentifier": "com.sudhanshu30602.expoRouterTV"
     },
     "web": {
       "bundler": "metro",
