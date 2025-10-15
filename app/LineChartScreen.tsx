@@ -1,38 +1,154 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { FocusableCard } from '../components/FocusableCard';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { LineChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
+import { Circle, G, Text as SvgText } from 'react-native-svg';
+import * as shape from 'd3-shape';
 import { lineData } from '../data/dummy_data';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function LineChartScreen() {
+  const [focusedIndex, setFocusedIndex] = useState(0); // default first point
+  const data = lineData.map(item => item.duration);
+  const labels = lineData.map(item => item.day);
+
+  const Decorator = ({ x, y, data }: any) => {
+    return data.map((value: number, index: number) => {
+      const isFocused = index === focusedIndex;
+      return (
+        <G key={index}>
+          <Circle
+            cx={x(index)}
+            cy={y(value)}
+            r={isFocused ? 8 : 5} // bigger radius for focused
+            stroke={isFocused ? '#FFD700' : '#ff6f61'}
+            strokeWidth={2}
+            fill={isFocused ? '#FFD700' : 'white'}
+          />
+          {isFocused && (
+            <SvgText
+              x={x(index)}
+              y={y(value) - 15}
+              fontSize={14}
+              fill="#333"
+              fontWeight="bold"
+              alignmentBaseline="middle"
+              textAnchor="middle"
+            >
+              {value}
+            </SvgText>
+          )}
+        </G>
+      );
+    });
+  };
+
+  // TV navigation handlers (fixed logic)
+  const movePrev = () => setFocusedIndex(prev => (prev > 0 ? prev - 1 : prev));
+  const moveNext = () => setFocusedIndex(prev => (prev < data.length - 1 ? prev + 1 : prev));
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Text style={styles.header}>Session Duration (Line Chart)</Text>
-      <FocusableCard>
-        <LineChart
-          data={lineData}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={{
-            backgroundGradientFrom: '#f0f2f5',
-            backgroundGradientTo: '#f0f2f5',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255,111,97,${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-            style: { borderRadius: 12 },
-            propsForDots: { r: '6', strokeWidth: '2', stroke: '#ff6f61' },
-          }}
-          bezier
-          style={{ borderRadius: 12 }}
-        />
-      </FocusableCard>
-    </View>
+      <View style={styles.chartWrapper}>
+        <View style={{ height: 280, flexDirection: 'row', paddingVertical: 16 }}>
+          <YAxis
+            data={data}
+            contentInset={{ top: 20, bottom: 20 }}
+            svg={{ fill: '#333', fontSize: 10 }}
+            numberOfTicks={5}
+            formatLabel={(value: any) => `${value}`}
+          />
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <LineChart
+              style={{ flex: 1 }}
+              data={data}
+              svg={{ stroke: '#ff6f61', strokeWidth: 3 }}
+              contentInset={{ top: 20, bottom: 20 }}
+              curve={shape.curveNatural}
+            >
+              <Grid svg={{ stroke: '#e0e0e0', strokeWidth: 1 }} />
+              <Decorator />
+            </LineChart>
+            <XAxis
+              style={{ marginTop: 10 }}
+              data={data}
+              formatLabel={(value: any, index: any) => labels[index]}
+              contentInset={{ left: 20, right: 20 }}
+              svg={{ fontSize: 12, fill: '#333' }}
+            />
+          </View>
+        </View>
+
+        {/* Info & TV Navigation */}
+        <View style={styles.navigationContainer}>
+          <Text style={styles.infoText}>
+            {`${labels[focusedIndex]}: ${data[focusedIndex]} min`}
+          </Text>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.navButton} onPress={movePrev}>
+              <Text style={styles.navButtonText}>◀ Previous</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navButton} onPress={moveNext}>
+              <Text style={styles.navButtonText}>Next ▶</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0f2f5', alignItems: 'center', justifyContent: 'center' },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f0f2f5',
+  },
+  contentContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center',
+  },
+  chartWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    minWidth: screenWidth - 100,
+    alignSelf: 'center',
+  },
+  navigationContainer: {
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4f6cff',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  navButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#4f6cff',
+    borderRadius: 10,
+  },
+  navButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+  },
 });

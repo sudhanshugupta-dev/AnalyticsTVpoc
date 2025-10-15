@@ -1,18 +1,26 @@
+// components/FocusableCard.tsx
 import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, View } from 'react-native';
 
-export const FocusableCard = ({ children, onPress }: { children: React.ReactNode, onPress?: () => void }) => {
+export const FocusableCard = ({
+  children,
+  onPress,
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+}) => {
   const [focused, setFocused] = useState(false);
 
   return (
     <TouchableOpacity
+      focusable={true}            // required for TV focus
       activeOpacity={1}
       onPress={onPress}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       style={[styles.card, focused && styles.focusedCard]}
     >
-      {children}
+      <View>{children}</View>
     </TouchableOpacity>
   );
 };
