@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, useTVEventHandler } from 'react-native';
 import { PieChart } from 'react-native-svg-charts';
 import { Text as SvgText } from 'react-native-svg';
 import { pieData } from '../data/dummy_data';
@@ -7,21 +7,29 @@ import { pieData } from '../data/dummy_data';
 const screenWidth = Dimensions.get('window').width;
 
 export default function PieChartScreen() {
-  const [focusedSlice, setFocusedSlice] = useState<number>(0); // default first slice
+  const [focusedSlice, setFocusedSlice] = useState(0);
+
   const colors = ['#4f6cff', '#ff6f61', '#ffa500', '#00c851', '#33b5e5'];
 
+  // 🔹 FIXED: Build pie chart data with PROPER focus effect
   const data = pieData.map((item, index) => ({
     value: item.y,
     svg: {
       fill: colors[index % colors.length],
-      outerRadius: focusedSlice === index ? '105%' : '90%', // focus effect
+      // ✅ CORRECT: Use numbers (not %) - focused slice grows 20% larger
+      outerRadius: focusedSlice === index ? '110' : '90',
+      innerRadius: focusedSlice === index ? '25' : '35',
+      // ✅ Add stroke for better focus visibility
+      stroke: focusedSlice === index ? '#FFD700' : 'transparent',
+      strokeWidth: focusedSlice === index ? 3 : 0,
     },
     key: `pie-${index}`,
     label: item.x,
   }));
 
-  const Labels = ({ slices }: any) => {
-    return slices.map((slice: any, index: number) => {
+  // 🔹 Labels inside the pie chart
+  const Labels = ({ slices }: any) =>
+    slices.map((slice: any, index: number) => {
       const { labelCentroid, data } = slice;
       const isFocused = index === focusedSlice;
       return (
@@ -31,7 +39,7 @@ export default function PieChartScreen() {
           y={labelCentroid[1]}
           fill={isFocused ? '#FFD700' : '#333'}
           fontSize={isFocused ? 18 : 14}
-          fontWeight="bold"
+          fontWeight={isFocused ? 'bold' : 'normal'}
           textAnchor="middle"
           alignmentBaseline="middle"
         >
@@ -39,41 +47,46 @@ export default function PieChartScreen() {
         </SvgText>
       );
     });
+
+  // 🔹 Handle TV remote input
+  const tvEventHandler = (evt: any) => {
+    if (!evt) return;
+
+    switch (evt.eventType) {
+      case 'right':
+        setFocusedSlice(prev => (prev + 1) % data.length);
+        break;
+      case 'left':
+        setFocusedSlice(prev => (prev - 1 + data.length) % data.length);
+        break;
+      case 'select':
+        console.log(`✅ Selected: ${data[focusedSlice].label} = ${data[focusedSlice].value}`);
+        break;
+      default:
+        break;
+    }
   };
 
-  // TV navigation handlers (fixed logic)
-  const movePrev = () => setFocusedSlice(prev => (prev > 0 ? prev - 1 : prev));
-  const moveNext = () => setFocusedSlice(prev => (prev < data.length - 1 ? prev + 1 : prev));
+  useTVEventHandler(tvEventHandler);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.header}>Feature Usage (Pie Chart)</Text>
+
       <View style={styles.chartWrapper}>
+        {/* ✅ FIXED: Remove conflicting innerRadius & labelRadius props */}
         <PieChart
-          style={{ height: 250, width: screenWidth - 120 }} // smaller chart
+          style={{ height: 280, width: screenWidth - 100 }}
           data={data}
-          innerRadius={'35%'}
-          labelRadius={'100%'}
+          // Let each slice control its own radius via svg props
         >
           <Labels />
         </PieChart>
 
-        {/* Info & TV Navigation */}
         <View style={styles.navigationContainer}>
           <Text style={styles.infoText}>
             {`${data[focusedSlice].label}: ${data[focusedSlice].value}`}
           </Text>
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.navButton} onPress={movePrev}>
-              <Text style={styles.navButtonText}>◀ Previous</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton} onPress={moveNext}>
-              <Text style={styles.navButtonText}>Next ▶</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
     </ScrollView>
@@ -83,7 +96,7 @@ export default function PieChartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+  backgroundColor: '#f0f2f5',
   },
   contentContainer: {
     padding: 20,
@@ -94,40 +107,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#333',
-    textAlign: 'center',
   },
   chartWrapper: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
+  
+    borderRadius: 20,
+    padding: 25,
     minWidth: screenWidth - 100,
-    minHeight: 350,
+    minHeight: 360,
     alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
   },
   navigationContainer: {
-    marginTop: 15,
+    marginTop: 20,
     alignItems: 'center',
   },
   infoText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#4f6cff',
-    marginBottom: 12,
-    textAlign: 'center',
+    marginBottom: 8,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 15,
-  },
-  navButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#4f6cff',
-    borderRadius: 10,
-  },
-  navButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
+  hintText: {
+    fontSize: 14,
+    color: '#888',
   },
 });

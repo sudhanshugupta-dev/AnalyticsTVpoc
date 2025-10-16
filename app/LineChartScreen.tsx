@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity, useTVEventHandler } from 'react-native';
 import { LineChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
 import { Circle, G, Text as SvgText } from 'react-native-svg';
 import * as shape from 'd3-shape';
@@ -43,9 +43,32 @@ export default function LineChartScreen() {
     });
   };
 
-  // TV navigation handlers (fixed logic)
-  const movePrev = () => setFocusedIndex(prev => (prev > 0 ? prev - 1 : prev));
-  const moveNext = () => setFocusedIndex(prev => (prev < data.length - 1 ? prev + 1 : prev));
+  
+   // ✅ Modern TV event hook
+    const tvEventHandler = (evt: any) => {
+      if (!evt) return;
+  
+      console.log('🎮 TV Event fired:', evt.eventType);
+  
+      switch (evt.eventType) {
+        case 'right':
+          setFocusedIndex(prev => (prev + 1) % data.length);
+          break;
+        case 'left':
+          setFocusedIndex(prev => (prev - 1 + data.length) % data.length);
+          break;
+        case 'select':
+          console.log(`✅ Selected: ${labels[focusedIndex]} → ${data[focusedIndex]}`);
+          break;
+        default:
+          console.log('Other event:', evt.eventType);
+          break;
+      }
+    };
+  
+    // Attach event handler
+    useTVEventHandler(tvEventHandler);
+  
 
   return (
     <ScrollView
@@ -88,14 +111,6 @@ export default function LineChartScreen() {
           <Text style={styles.infoText}>
             {`${labels[focusedIndex]}: ${data[focusedIndex]} min`}
           </Text>
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.navButton} onPress={movePrev}>
-              <Text style={styles.navButtonText}>◀ Previous</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton} onPress={moveNext}>
-              <Text style={styles.navButtonText}>Next ▶</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
     </ScrollView>
