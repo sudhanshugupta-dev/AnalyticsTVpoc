@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, useTVEventHandler } from 'react-native';
-import { PieChart } from 'react-native-svg-charts';
-import { G, Text as SvgText, Circle } from 'react-native-svg';
 import { FocusableCard } from '../components/FocusableCard';
 import { donutData } from '@/data/dummy_data';
+import DonutChart from '../components/charts/DonutChartComponent';
+
 const screenWidth = Dimensions.get('window').width;
 
 
@@ -11,7 +11,14 @@ const screenWidth = Dimensions.get('window').width;
 export default function DonutChartScreen() {
   const [focusedIndex, setFocusedIndex] = useState(0);
 
-  // TV remote handler
+  const handleFocusChange = (index: number) => {
+    setFocusedIndex(index);
+  };
+
+  const handleSelect = (index: number) => {
+    console.log('Selected Slice:', donutData[index]);
+  };
+
   const tvHandler = (evt: any) => {
     if (!evt) return;
     const t = evt.eventType;
@@ -21,41 +28,10 @@ export default function DonutChartScreen() {
     } else if (t === 'left') {
       setFocusedIndex(prev => Math.max(prev - 1, 0));
     } else if (t === 'select') {
-      console.log('Selected Slice:', donutData[focusedIndex]);
+      handleSelect(focusedIndex);
     }
   };
   useTVEventHandler(tvHandler);
-
-  const pieData = donutData.map((item, index) => ({
-    value: item.value,
-    svg: {
-      fill: item.color,
-      onPress: () => console.log(`Pressed ${item.label}`),
-    },
-    key: `slice-${index}`,
-  }));
-
-  const Labels = ({ slices }: any) => {
-    return slices.map((slice: any, index: number) => {
-      const { labelCentroid, pieCentroid } = slice;
-      const isFocused = index === focusedIndex;
-      const r = isFocused ? 16 : 12; // larger font for focused
-      return (
-        <SvgText
-          key={index}
-          x={labelCentroid[0]}
-          y={labelCentroid[1]}
-          fill={'#fff'}
-          fontSize={r}
-          fontWeight={isFocused ? 'bold' : 'normal'}
-          alignmentBaseline={'middle'}
-          textAnchor={'middle'}
-        >
-          {donutData[index].label}
-        </SvgText>
-      );
-    });
-  };
 
   return (
     <ScrollView
@@ -65,21 +41,20 @@ export default function DonutChartScreen() {
       <Text style={styles.header}>Feature Distribution (Donut Chart)</Text>
 
       <FocusableCard>
-        <View style={styles.chartWrapper}>
-          <PieChart
-            style={{ height: 300 }}
-            data={pieData}
-            innerRadius={'50%'}
-            outerRadius={'90%'}
-          >
-            <Labels />
-          </PieChart>
-
-          <Text style={styles.valueLabel}>
-            🎯 Focused: {donutData[focusedIndex].label} → {donutData[focusedIndex].value}%
-          </Text>
-          <Text style={styles.hintText}>Use Left / Right / OK to navigate slices</Text>
-        </View>
+        <DonutChart
+          data={donutData}
+          focusedIndex={focusedIndex}
+          onFocusChange={handleFocusChange}
+          onSelect={handleSelect}
+          height={300}
+          innerRadius="50%"
+          outerRadius="90%"
+          showLabels={true}
+        />
+        <Text style={styles.valueLabel}>
+          🎯 Focused: {donutData[focusedIndex].label} → {donutData[focusedIndex].value}%
+        </Text>
+        <Text style={styles.hintText}>Use Left / Right / OK to navigate slices</Text>
       </FocusableCard>
     </ScrollView>
   );

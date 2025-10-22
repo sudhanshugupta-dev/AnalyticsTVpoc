@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, useTVEventHandler } from 'react-native';
-import { LineChart, XAxis, YAxis, Grid } from 'react-native-svg-charts';
-import { Circle, G } from 'react-native-svg';
-import * as shape from 'd3-shape';
 import { FocusableCard } from '../components/FocusableCard';
 import { bubbleData } from '@/data/dummy_data';
-// Bubble data: each bubble has x, y, and size
+import BubbleChart from '../components/charts/BubbleChartComponent';
 
-const screenWidth = Dimensions.get('window').width;
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function BubbleChartScreen() {
   const [focusedIndex, setFocusedIndex] = useState(0);
 
-  const yValues = bubbleData.map(d => d.y);
-  const xLabels = bubbleData.map(d => d.x);
+  const handleFocusChange = (index: number) => {
+    setFocusedIndex(index);
+  };
 
-  // TV remote handler
+  const handleSelect = (index: number) => {
+    console.log('Selected Bubble:', bubbleData[index]);
+  };
+
   const tvHandler = (evt: any) => {
     if (!evt) return;
     const t = evt.eventType;
@@ -25,49 +26,10 @@ export default function BubbleChartScreen() {
     } else if (t === 'left') {
       setFocusedIndex(prev => Math.max(prev - 1, 0));
     } else if (t === 'select') {
-      console.log('Selected Bubble:', bubbleData[focusedIndex]);
+      handleSelect(focusedIndex);
     }
   };
   useTVEventHandler(tvHandler);
-
-  const { Text: TextSvg } = require('react-native-svg');
-
-  // Decorator for Bubbles
-  const Decorator = ({ x, y, data }: any) => (
-    <>
-      {data.map((value: number, index: number) => {
-        const bubble = bubbleData[index];
-        const isFocused = index === focusedIndex;
-        const bubbleColor = isFocused ? '#4f6cff' : '#8aa4ff';
-        const bubbleSize = bubble.size * (isFocused ? 2.0 : 1.4);
-
-        return (
-          <G key={index}>
-            <Circle
-              cx={x(index)}
-              cy={y(value)}
-              r={bubbleSize}
-              fill={bubbleColor}
-              stroke="#fff"
-              strokeWidth={2}
-            />
-            {isFocused && (
-              <TextSvg
-                x={x(index)}
-                y={y(value) - bubbleSize - 8}
-                fontSize={12}
-                fill="#333"
-                textAnchor="middle"
-                alignmentBaseline="middle"
-              >
-                {`Y: ${bubble.y}`}
-              </TextSvg>
-            )}
-          </G>
-        );
-      })}
-    </>
-  );
 
   return (
     <ScrollView
@@ -77,41 +39,20 @@ export default function BubbleChartScreen() {
       <Text style={styles.header}>Performance Bubble Chart</Text>
 
       <FocusableCard>
-        <View style={styles.chartWrapper}>
-          <View style={{ height: 320, flexDirection: 'row', paddingVertical: 16 }}>
-            <YAxis
-              data={yValues}
-              contentInset={{ top: 20, bottom: 20 }}
-              svg={{ fill: '#555', fontSize: 10 }}
-            />
-            <View style={{ flex: 1, marginLeft: 10 }}>
-              <LineChart
-                style={{ flex: 1 }}
-                data={yValues}
-                svg={{ stroke: 'transparent', strokeWidth: 0 }}
-                contentInset={{ top: 20, bottom: 20 }}
-                curve={shape.curveLinear}
-              >
-                <Grid svg={{ stroke: '#e0e0e0' }} />
-                <Decorator />
-              </LineChart>
-
-              <XAxis
-                style={{ marginTop: 10 }}
-                data={yValues}
-                formatLabel={(value, index) => xLabels[index]}
-                contentInset={{ left: 20, right: 20 }}
-                svg={{ fontSize: 12, fill: '#333' }}
-              />
-            </View>
-          </View>
-
-          <Text style={styles.valueLabel}>
-            🎯 Focused: {xLabels[focusedIndex]} → {yValues[focusedIndex]} | Size:{' '}
-            {bubbleData[focusedIndex].size}
-          </Text>
-          <Text style={styles.hintText}>Use Left / Right / OK to navigate bubbles</Text>
-        </View>
+        <BubbleChart
+          data={bubbleData}
+          focusedIndex={focusedIndex}
+          onFocusChange={handleFocusChange}
+          onSelect={handleSelect}
+          bubbleColor="#8aa4ff"
+          highlightColor="#4f6cff"
+          height={320}
+        />
+        <Text style={styles.valueLabel}>
+          🎯 Focused: {bubbleData[focusedIndex].x} → {bubbleData[focusedIndex].y} | Size:{' '}
+          {bubbleData[focusedIndex].size}
+        </Text>
+        <Text style={styles.hintText}>Use Left / Right / OK to navigate bubbles</Text>
       </FocusableCard>
     </ScrollView>
   );

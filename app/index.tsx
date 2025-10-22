@@ -18,6 +18,9 @@ export default function Home() {
       <FocusableCard onPress={() => router.push('/MainScreen')}>
         <Text style={styles.cardText}>Analytics</Text>
       </FocusableCard>
+      <FocusableCard onPress={() => router.push('/WeatherAnalytics')}>
+        <Text style={styles.cardText}>Weather Analytics Dashboard</Text>
+      </FocusableCard>  
       <FocusableCard onPress={() => router.push('/PieChartScreen')}>
         <Text style={styles.cardText}>Maps</Text>
       </FocusableCard>   

@@ -30,8 +30,10 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 12,
     backgroundColor: '#fff',
-    padding: 10,
+    padding: 20,
     elevation: 5,
+    width: '90%',
+    alignSelf: 'center',
   },
   focusedCard: {
     borderWidth: 3,

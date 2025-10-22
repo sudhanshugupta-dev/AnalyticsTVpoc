@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, useTVEventHandler } from 'react-native';
-import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
 import { FocusableCard } from '../components/FocusableCard';
+import GaugeChart from '../components/charts/GaugeChartComponent';
 
 const screenWidth = Dimensions.get('window').width;
-const radius = 100; // radius of gauge
-const strokeWidth = 20; // thickness of gauge
 
 export default function GaugeChartScreen() {
   const [value, setValue] = useState(50); // initial value 0-100
@@ -19,52 +17,20 @@ export default function GaugeChartScreen() {
   };
   useTVEventHandler(tvHandler);
 
-  const circumference = 2 * Math.PI * radius;
-  const progress = (value / 100) * circumference;
-
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Progress / Gauge Chart</Text>
       <FocusableCard>
-        <View style={styles.chartWrapper}>
-          <Svg width={radius * 2 + 40} height={radius * 2 + 40}>
-            <G rotation="-90" origin={`${radius + 20}, ${radius + 20}`}>
-              {/* Background Circle */}
-              <Circle
-                cx={radius + 20}
-                cy={radius + 20}
-                r={radius}
-                stroke="#e0e0e0"
-                strokeWidth={strokeWidth}
-                fill="none"
-              />
-              {/* Progress Arc */}
-              <Circle
-                cx={radius + 20}
-                cy={radius + 20}
-                r={radius}
-                stroke="#4f6cff"
-                strokeWidth={strokeWidth}
-                fill="none"
-                strokeDasharray={`${progress}, ${circumference}`}
-                strokeLinecap="round"
-              />
-            </G>
-            {/* Value Label */}
-            <SvgText
-              x={radius + 20}
-              y={radius + 30}
-              fontSize={28}
-              fontWeight="bold"
-              fill="#4f6cff"
-              textAnchor="middle"
-            >
-              {value}%
-            </SvgText>
-          </Svg>
-
-          <Text style={styles.hintText}>Use Left / Right to adjust, OK to select</Text>
-        </View>
+        <GaugeChart
+          value={value}
+          maxValue={100}
+          radius={100}
+          strokeWidth={20}
+          color="#4f6cff"
+          backgroundColor="#e0e0e0"
+          showValue={true}
+        />
+        <Text style={styles.hintText}>Use Left / Right to adjust, OK to select</Text>
       </FocusableCard>
     </View>
   );
