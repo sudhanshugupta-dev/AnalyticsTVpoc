@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, useTVEventHandler } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  useTVEventHandler,
+} from 'react-native';
 import { PieChart } from 'react-native-svg-charts';
 import { Text as SvgText } from 'react-native-svg';
 import { pieData } from '../data/dummy_data';
 
 const screenWidth = Dimensions.get('window').width;
 
+// Generate a color for each slice
+const generateColors = (length: number) => {
+  const colors: string[] = [];
+  for (let i = 0; i < length; i++) {
+    colors.push(`hsl(${(i * 360) / length}, 70%, 55%)`);
+  }
+  return colors;
+};
+
 export default function PieChartScreen() {
   const [focusedSlice, setFocusedSlice] = useState(0);
 
-  const colors = ['#4f6cff', '#ff6f61', '#ffa500', '#00c851', '#33b5e5'];
+  const colors = generateColors(pieData.length);
 
-  // 🔹 FIXED: Build pie chart data with PROPER focus effect
+  // Build chart data dynamically
   const data = pieData.map((item, index) => ({
     value: item.y,
     svg: {
-      fill: colors[index % colors.length],
-      // ✅ CORRECT: Use numbers (not %) - focused slice grows 20% larger
-      outerRadius: focusedSlice === index ? '110' : '90',
-      innerRadius: focusedSlice === index ? '25' : '35',
-      // ✅ Add stroke for better focus visibility
+      fill: colors[index],
+      outerRadius: focusedSlice === index ? '110%' : '100%',
+      innerRadius: focusedSlice === index ? '30%' : '40%',
       stroke: focusedSlice === index ? '#FFD700' : 'transparent',
       strokeWidth: focusedSlice === index ? 3 : 0,
     },
@@ -27,7 +41,7 @@ export default function PieChartScreen() {
     label: item.x,
   }));
 
-  // 🔹 Labels inside the pie chart
+  // Labels in the pie chart
   const Labels = ({ slices }: any) =>
     slices.map((slice: any, index: number) => {
       const { labelCentroid, data } = slice;
@@ -38,7 +52,7 @@ export default function PieChartScreen() {
           x={labelCentroid[0]}
           y={labelCentroid[1]}
           fill={isFocused ? '#FFD700' : '#333'}
-          fontSize={isFocused ? 18 : 14}
+          fontSize={isFocused ? 16 : 12}
           fontWeight={isFocused ? 'bold' : 'normal'}
           textAnchor="middle"
           alignmentBaseline="middle"
@@ -48,10 +62,9 @@ export default function PieChartScreen() {
       );
     });
 
-  // 🔹 Handle TV remote input
+  // TV remote navigation
   const tvEventHandler = (evt: any) => {
     if (!evt) return;
-
     switch (evt.eventType) {
       case 'right':
         setFocusedSlice(prev => (prev + 1) % data.length);
@@ -60,13 +73,12 @@ export default function PieChartScreen() {
         setFocusedSlice(prev => (prev - 1 + data.length) % data.length);
         break;
       case 'select':
-        console.log(`✅ Selected: ${data[focusedSlice].label} = ${data[focusedSlice].value}`);
+        console.log(`Selected: ${data[focusedSlice].label} = ${data[focusedSlice].value}`);
         break;
       default:
         break;
     }
   };
-
   useTVEventHandler(tvEventHandler);
 
   return (
@@ -74,11 +86,9 @@ export default function PieChartScreen() {
       <Text style={styles.header}>Feature Usage (Pie Chart)</Text>
 
       <View style={styles.chartWrapper}>
-        {/* ✅ FIXED: Remove conflicting innerRadius & labelRadius props */}
         <PieChart
           style={{ height: 280, width: screenWidth - 100 }}
           data={data}
-          // Let each slice control its own radius via svg props
         >
           <Labels />
         </PieChart>
@@ -87,6 +97,9 @@ export default function PieChartScreen() {
           <Text style={styles.infoText}>
             {`${data[focusedSlice].label}: ${data[focusedSlice].value}`}
           </Text>
+          <Text style={styles.hintText}>
+            Use ← → on remote to change focus | OK to select
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -94,44 +107,22 @@ export default function PieChartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  backgroundColor: '#f0f2f5',
-  },
-  contentContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
+  container: { flex: 1, backgroundColor: '#f0f2f5' },
+  contentContainer: { padding: 20, alignItems: 'center' },
+  header: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, color: '#333' },
   chartWrapper: {
-  
     borderRadius: 20,
     padding: 25,
     minWidth: screenWidth - 100,
     minHeight: 360,
     alignSelf: 'center',
+    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 8,
   },
-  navigationContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  infoText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4f6cff',
-    marginBottom: 8,
-  },
-  hintText: {
-    fontSize: 14,
-    color: '#888',
-  },
+  navigationContainer: { marginTop: 20, alignItems: 'center' },
+  infoText: { fontSize: 18, fontWeight: 'bold', color: '#4f6cff', marginBottom: 8 },
+  hintText: { fontSize: 14, color: '#888' },
 });
