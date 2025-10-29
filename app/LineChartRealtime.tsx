@@ -106,7 +106,7 @@ export default function TradeLineChartScreen() {
       <View style={styles.tradesContainer}>
         <Text style={styles.tradesHeader}>Recent Trades (Last 5)</Text>
         {trades.slice(0, 5).map((trade, index) => (
-          <View key={index} style={styles.tradeItem}>
+          <View key={`trade-${trade.s}-${trade.t}-${index}`} style={styles.tradeItem}>
             <Text style={styles.symbol}>{trade.s}</Text>
             <Text style={styles.price}>${trade.p.toFixed(2)}</Text>
             <Text style={styles.volume}>Vol: {trade.v}</Text>

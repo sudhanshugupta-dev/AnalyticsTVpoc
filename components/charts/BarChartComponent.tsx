@@ -27,33 +27,50 @@ const BarChart: React.FC<BarChartProps> = ({
   height = 300,
 }) => {
   const maxValue = Math.max(...data);
+  const minValue = Math.min(...data);
   const barWidth = 40;
 
-  const Labels = ({ x, y, bandwidth, data }: any) =>
-    data.map((value: number, index: number) => (
-      <SvgText
-        key={index}
-        x={x(index) + bandwidth / 2}
-        y={value < maxValue / 4 ? y(value) - 12 : y(value) + 15}
-        fontSize={14}
-        fill={value >= maxValue / 4 ? 'white' : '#333'}
-        alignmentBaseline="middle"
-        textAnchor="middle"
-      >
-        {data[index]}
-      </SvgText>
-    ));
+  const Labels = ({ x, y, bandwidth, data }: any) => {
+    return data.map((value: number, index: number) => {
+      // Only show label for focused bar to prevent overlap
+      if (index !== focusedIndex) return null;
+      
+      // Position label above bar with better spacing
+      const labelY = y(value) - 15;
+      const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
+      
+      return (
+        <SvgText
+          key={`label-${index}-${value}`}
+          x={x(index) + bandwidth / 2}
+          y={labelY}
+          fontSize={16}
+          fill="#fff"
+          fontWeight="bold"
+          alignmentBaseline="middle"
+          textAnchor="middle"
+          stroke="#000"
+          strokeWidth={0.5}
+        >
+          {displayValue}
+        </SvgText>
+      );
+    });
+  };
 
   const FocusHighlight = ({ x, y, bandwidth, data }: any) => {
+    if (focusedIndex >= data.length) return null;
+    
     return (
       <Rect
+        key={`highlight-${focusedIndex}`}
         x={x(focusedIndex)}
         y={y(data[focusedIndex])}
         width={bandwidth}
         height={y(0) - y(data[focusedIndex])}
-        fill={`rgba(255, 215, 0, 0.15)`}
+        fill={`rgba(255, 215, 0, 0.2)`}
         stroke={highlightColor}
-        strokeWidth={2}
+        strokeWidth={3}
         rx={6}
         ry={6}
       />
@@ -65,32 +82,32 @@ const BarChart: React.FC<BarChartProps> = ({
       <View style={{ flexDirection: 'row', paddingVertical: 16, width: '100%' }}>
         <YAxis
           data={data}
-          svg={{ fill: '#333', fontSize: 12 }}
+          svg={{ fill: '#666', fontSize: 11 }}
           numberOfTicks={5}
-          contentInset={{ top: 20, bottom: 20 }}
-          formatLabel={(value: any) => `${value}`}
+          contentInset={{ top: 30, bottom: 20 }}
+          formatLabel={(value: any) => typeof value === 'number' ? value.toFixed(0) : value}
         />
         <View style={{ flex: 1, marginLeft: 10 }}>
           <SVCBarChart
             style={{ height, width: '100%' }}
             data={data}
             svg={{ fill: barColor }}
-            contentInset={{ top: 20, bottom: 20, left: 10, right: 10 }}
-            spacingInner={0.4}
+            contentInset={{ top: 30, bottom: 20, left: 10, right: 10 }}
+            spacingInner={0.3}
             spacingOuter={0.2}
             gridMin={0}
           >
-            <Grid />
-            <Labels />
+            <Grid svg={{ stroke: '#e0e0e0', strokeWidth: 0.5, opacity: 0.5 }} />
             <FocusHighlight />
+            <Labels />
           </SVCBarChart>
 
           <XAxis
-            style={{ marginTop: 10, height: 20 }}
+            style={{ marginTop: 10, height: 30 }}
             data={labels}
-            formatLabel={(value: number) => labels[value]}
+            formatLabel={(value: number) => labels[value] || ''}
             contentInset={{ left: 10, right: 10 }}
-            svg={{ fontSize: 12, fill: '#333' }}
+            svg={{ fontSize: 10, fill: '#666' }}
           />
         </View>
       </View>

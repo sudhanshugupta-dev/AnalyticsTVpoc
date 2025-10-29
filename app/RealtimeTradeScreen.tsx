@@ -38,7 +38,7 @@ export default function RealtimeTradeScreen() {
       <Text style={styles.title}>📈 Real-time Trades</Text>
       <FlatList
         data={trades}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => `${item.s}-${item.t}-${index}`}
         renderItem={({ item }) => (
           <View style={styles.tradeItem}>
             <Text style={styles.symbol}>{item.s}</Text>

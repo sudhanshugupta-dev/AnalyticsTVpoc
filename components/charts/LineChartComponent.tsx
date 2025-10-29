@@ -33,11 +33,21 @@ const LineChart: React.FC<LineChartProps> = ({
   width = '100%',
   height = 300,
 }) => {
-  const Decorator = ({ x, y, data }: any) =>
-    data.map((value: number, index: number) => {
+  const Decorator = ({ x, y, data }: any) => {
+    // Calculate min/max for better label positioning
+    const minValue = Math.min(...data);
+    const maxValue = Math.max(...data);
+    const range = maxValue - minValue;
+    
+    return data.map((value: number, index: number) => {
       const isFocused = index === focusedIndex;
+      
+      // Determine if label should be above or below point to avoid overlap
+      const isNearTop = (value - minValue) / range > 0.7;
+      const labelY = isNearTop ? y(value) + 25 : y(value) - 25;
+      
       return (
-        <G key={index}>
+        <G key={`point-${index}-${value}`}>
           <Circle
             cx={x(index)}
             cy={y(value)}
@@ -49,48 +59,51 @@ const LineChart: React.FC<LineChartProps> = ({
           {isFocused && (
             <SvgText
               x={x(index)}
-              y={y(value) - 20}
+              y={labelY}
               fontSize={14}
-              fill="#333"
+              fill="#fff"
               fontWeight="bold"
               alignmentBaseline="middle"
               textAnchor="middle"
+              stroke="#000"
+              strokeWidth={0.5}
             >
-              {data[index]}
+              {typeof value === 'number' ? value.toFixed(2) : value}
             </SvgText>
           )}
         </G>
       );
     });
+  };
 
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: 'row', paddingVertical: 16, width: '100%' }}>
         <YAxis
           data={data}
-          contentInset={{ top: 30, bottom: 30 }}
-          svg={{ fill: '#333', fontSize: 12 }}
+          contentInset={{ top: 40, bottom: 40 }}
+          svg={{ fill: '#666', fontSize: 11 }}
           numberOfTicks={5}
-          formatLabel={(value: any) => `${value}`}
+          formatLabel={(value: any) => typeof value === 'number' ? value.toFixed(1) : value}
         />
         <View style={{ flex: 1, marginLeft: 10 }}>
           <SVCLineChart
             style={{ height, width: '100%' }}
             data={data}
             svg={{ stroke: lineColor, strokeWidth: 3 }}
-            contentInset={{ top: 30, bottom: 30, left: 20, right: 20 }}
+            contentInset={{ top: 40, bottom: 40, left: 20, right: 20 }}
             curve={shape.curveNatural}
           >
-            <Grid svg={{ stroke: '#e0e0e0', strokeWidth: 1 }} />
+            <Grid svg={{ stroke: '#e0e0e0', strokeWidth: 0.5, opacity: 0.5 }} />
             <Decorator />
           </SVCLineChart>
 
           <XAxis
-            style={{ marginTop: 10, height: 20 }}
+            style={{ marginTop: 10, height: 30 }}
             data={labels}
-            formatLabel={(value: number) => labels[value]}
+            formatLabel={(value: number) => labels[value] || ''}
             contentInset={{ left: 20, right: 20 }}
-            svg={{ fontSize: 12, fill: '#333' }}
+            svg={{ fontSize: 10, fill: '#666', rotation: 0 }}
           />
         </View>
       </View>

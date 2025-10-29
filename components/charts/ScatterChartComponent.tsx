@@ -33,37 +33,54 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
   const xLabels = data.map(d => d.x.toString());
   const chartWidth = Math.max(screenWidth - 100, data.length * 60);
 
-  const Decorator = ({ x, y, data: chartData }: any) => (
-    <>
-      {chartData.map((value: number, index: number) => {
-        const isFocused = index === focusedIndex;
-        return (
-          <G key={index}>
-            <Circle
-              cx={x(index)}
-              cy={y(value)}
-              r={isFocused ? 8 : 5}
-              stroke={isFocused ? highlightColor : pointColor}
-              strokeWidth={2}
-              fill={isFocused ? highlightColor : '#fff'}
-            />
-            {isFocused && (
-              <SvgText
-                x={x(index)}
-                y={y(value) - 14}
-                fontSize={12}
-                fill="#222"
-                alignmentBaseline="middle"
-                textAnchor="middle"
-              >
-                {String(value)}
-              </SvgText>
-            )}
-          </G>
-        );
-      })}
-    </>
-  );
+  const Decorator = ({ x, y, data: chartData }: any) => {
+    // Calculate min/max for better label positioning
+    const minValue = Math.min(...chartData);
+    const maxValue = Math.max(...chartData);
+    const range = maxValue - minValue;
+    
+    return (
+      <>
+        {chartData.map((value: number, index: number) => {
+          const isFocused = index === focusedIndex;
+          
+          // Determine if label should be above or below point
+          const isNearTop = (value - minValue) / range > 0.7;
+          const labelY = isNearTop ? y(value) + 20 : y(value) - 20;
+          const displayValue = typeof value === 'number' ? value.toFixed(2) : String(value);
+          
+          return (
+            <G key={`scatter-${index}-${value}`}>
+              <Circle
+                cx={x(index)}
+                cy={y(value)}
+                r={isFocused ? 10 : 6}
+                stroke={isFocused ? highlightColor : pointColor}
+                strokeWidth={2}
+                fill={isFocused ? highlightColor : '#fff'}
+                opacity={isFocused ? 1 : 0.8}
+              />
+              {isFocused && (
+                <SvgText
+                  x={x(index)}
+                  y={labelY}
+                  fontSize={14}
+                  fill="#fff"
+                  fontWeight="bold"
+                  alignmentBaseline="middle"
+                  textAnchor="middle"
+                  stroke="#000"
+                  strokeWidth={0.5}
+                >
+                  {displayValue}
+                </SvgText>
+              )}
+            </G>
+          );
+        })}
+      </>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -71,26 +88,28 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
         <View style={{ height, flexDirection: 'row', paddingVertical: 16, width: chartWidth }}>
           <YAxis
             data={yValues}
-            contentInset={{ top: 20, bottom: 20 }}
-            svg={{ fill: '#555', fontSize: 10 }}
+            contentInset={{ top: 30, bottom: 30 }}
+            svg={{ fill: '#666', fontSize: 11 }}
+            numberOfTicks={5}
+            formatLabel={(value: any) => typeof value === 'number' ? value.toFixed(1) : value}
           />
           <View style={{ flex: 1, marginLeft: 10 }}>
             <SVCLineChart
               style={{ flex: 1 }}
               data={yValues}
               svg={{ stroke: 'transparent', strokeWidth: 0 }}
-              contentInset={{ top: 20, bottom: 20 }}
+              contentInset={{ top: 30, bottom: 30 }}
             >
-              <Grid svg={{ stroke: '#e0e0e0' }} />
+              <Grid svg={{ stroke: '#e0e0e0', strokeWidth: 0.5, opacity: 0.5 }} />
               <Decorator />
             </SVCLineChart>
 
             <XAxis
-              style={{ marginTop: 10 }}
+              style={{ marginTop: 10, height: 30 }}
               data={yValues}
-              formatLabel={(value, index) => xLabels[index]}
+              formatLabel={(value, index) => xLabels[index] || ''}
               contentInset={{ left: 20, right: 20 }}
-              svg={{ fontSize: 12, fill: '#333' }}
+              svg={{ fontSize: 10, fill: '#666' }}
             />
           </View>
         </View>
