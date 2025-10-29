@@ -5,3 +5,4 @@ export { default as BubbleChart } from './BubbleChartComponent';
 export { default as ScatterChart } from './ScatterChartComponent';
 export { default as GaugeChart } from './GaugeChartComponent';
 export { default as DonutChart } from './DonutChartComponent';
+export { default as PieChart } from './PieChartComponent';

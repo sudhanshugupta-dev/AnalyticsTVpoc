@@ -14,25 +14,82 @@ export default function Home() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
-      <Text style={styles.header}>Analytics or Maps Dashboard (TV + Mobile)</Text>
-      <FocusableCard onPress={() => router.push('/MainScreen')}>
-        <Text style={styles.cardText}>Analytics</Text>
-      </FocusableCard>
-      <FocusableCard onPress={() => router.push('/WeatherAnalytics')}>
-        <Text style={styles.cardText}>Weather Analytics Dashboard</Text>
-      </FocusableCard>  
-      <FocusableCard onPress={() => router.push('/PieChartScreen')}>
-        <Text style={styles.cardText}>Maps</Text>
-      </FocusableCard>   
+      <Text style={styles.header}>📊 Real-Time Trading Analytics Dashboard</Text>
+      <Text style={styles.subHeader}>Select a visualization type to view live market data</Text>
+      
+      {/* Real-time Trading Screens */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Real-Time Analytics</Text>
+        
+        <FocusableCard onPress={() => router.push('/RealtimeTradeScreen')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>📈</Text>
+            <Text style={styles.cardTitle}>Real-time Trades</Text>
+            <Text style={styles.cardDescription}>Live trade feed with price & volume</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/LineChartRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>📉</Text>
+            <Text style={styles.cardTitle}>Line Chart (Real-time)</Text>
+            <Text style={styles.cardDescription}>Continuous price updates</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/BarChartRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>📊</Text>
+            <Text style={styles.cardTitle}>Bar Chart (30s intervals)</Text>
+            <Text style={styles.cardDescription}>Trade volume aggregated every 30s</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/ScatterPlotRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>🔵</Text>
+            <Text style={styles.cardTitle}>Scatter Plot (30s intervals)</Text>
+            <Text style={styles.cardDescription}>Price vs Volume correlation</Text>
+          </View>
+        </FocusableCard>
+      </View>
+
+      {/* Other Dashboards */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Other Dashboards</Text>
+        
+        <FocusableCard onPress={() => router.push('/MainScreen')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>📊</Text>
+            <Text style={styles.cardTitle}>Analytics</Text>
+            <Text style={styles.cardDescription}>General analytics dashboard</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/WeatherAnalytics')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>🌤️</Text>
+            <Text style={styles.cardTitle}>Weather Analytics</Text>
+            <Text style={styles.cardDescription}>Weather data visualization</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/PieChartScreen')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>🗺️</Text>
+            <Text style={styles.cardTitle}>Maps</Text>
+            <Text style={styles.cardDescription}>Geographic data visualization</Text>
+          </View>
+        </FocusableCard>
+      </View>
     </ScrollView>
-    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#0A0A0A',
   },
   contentContainer: {
     alignItems: 'center',
@@ -40,14 +97,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: '#fff',
+  },
+  subHeader: {
+    fontSize: 14,
+    color: '#888',
     marginBottom: 30,
     textAlign: 'center',
   },
-  cardText: {
+  section: {
+    width: '100%',
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00ffcc',
+    marginBottom: 15,
+    paddingLeft: 10,
+  },
+  card: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  cardIcon: {
+    fontSize: 40,
+    marginBottom: 10,
+  },
+  cardTitle: {
     fontSize: 18,
-    padding: 10,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  cardDescription: {
+    fontSize: 12,
+    color: '#888',
     textAlign: 'center',
   },
 });
