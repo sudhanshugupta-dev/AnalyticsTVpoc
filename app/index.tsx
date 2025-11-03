@@ -52,6 +52,30 @@ export default function Home() {
             <Text style={styles.cardDescription}>Price vs Volume correlation</Text>
           </View>
         </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/GaugeChartRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>⏱️</Text>
+            <Text style={styles.cardTitle}>Gauge Charts (Real-time)</Text>
+            <Text style={styles.cardDescription}>Live metrics with dynamic gauges</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/GanttChartRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>📅</Text>
+            <Text style={styles.cardTitle}>Gantt Chart (Real-time)</Text>
+            <Text style={styles.cardDescription}>Trading sessions timeline view</Text>
+          </View>
+        </FocusableCard>
+        
+        <FocusableCard onPress={() => router.push('/CandlestickChartRealtime')}>
+          <View style={styles.card}>
+            <Text style={styles.cardIcon}>🕯️</Text>
+            <Text style={styles.cardTitle}>Candlestick Chart (Real-time)</Text>
+            <Text style={styles.cardDescription}>OHLC data with 5s intervals</Text>
+          </View>
+        </FocusableCard>
       </View>
 
       {/* Other Dashboards */}

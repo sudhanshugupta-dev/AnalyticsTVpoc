@@ -36,6 +36,15 @@ export default function Home() {
       <FocusableCard onPress={() => router.push('/GaugeChartScreen')}>
         <Text style={styles.cardText}>Gauge Chart</Text>
       </FocusableCard>
+      <FocusableCard onPress={() => router.push('/CandlestickChartRealtime')}>
+        <Text style={styles.cardText}>Candlestick Chart (Real-time)</Text>
+      </FocusableCard>
+      <FocusableCard onPress={() => router.push('/GanttChartRealtime')}>
+        <Text style={styles.cardText}>Gantt Chart (Real-time)</Text>
+      </FocusableCard>
+      <FocusableCard onPress={() => router.push('/GaugeChartRealtime')}>
+        <Text style={styles.cardText}>Gauge Chart (Real-time)</Text>
+      </FocusableCard>
     </ScrollView>
     
   );

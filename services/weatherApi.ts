@@ -1,6 +1,6 @@
 import { WeatherResponse } from '../types/weather';
 
-const API_KEY = '50eebdeac4aecaaee312ae0f88af6cd9';
+const API_KEY = '848822cdcc6e2289e2a910d334da2e50';
 const BASE_URL = 'http://api.weatherstack.com/current';
 
 export const fetchWeatherData = async (city: string = 'Indore,India'): Promise<WeatherResponse> => {

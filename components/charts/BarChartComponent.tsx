@@ -105,7 +105,23 @@ const BarChart: React.FC<BarChartProps> = ({
           <XAxis
             style={{ marginTop: 10, height: 30 }}
             data={labels}
-            formatLabel={(value: number) => labels[value] || ''}
+         formatLabel={(value: number) => {
+  // If too many labels, skip some to avoid overlap
+  const total = labels.length;
+
+  // show every Nth label depending on density
+  const step = total > 15 ? 3 : total > 10 ? 2 : 1;
+
+  // Only show every `step` label
+  if (value % step !== 0) return '';
+
+  // Shorten label to HH:MM only (no seconds) if many points
+  const label = labels[value];
+  if (!label) return '';
+
+  // Format example: "2:12" instead of "2:12:22 AM"
+  return total > 10 ? label.split(':').slice(0, 2).join(':') : label;
+}}
             contentInset={{ left: 10, right: 10 }}
             svg={{ fontSize: 10, fill: '#666' }}
           />

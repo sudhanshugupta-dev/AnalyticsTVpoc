@@ -104,13 +104,22 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
               <Decorator />
             </SVCLineChart>
 
-            <XAxis
-              style={{ marginTop: 10, height: 30 }}
-              data={yValues}
-              formatLabel={(value, index) => xLabels[index] || ''}
-              contentInset={{ left: 20, right: 20 }}
-              svg={{ fontSize: 10, fill: '#666' }}
-            />
+          <XAxis
+  style={{ marginTop: 10, height: 30 }}
+  data={yValues}
+  formatLabel={(value, index) => {
+    if (!value && value !== 0) return '';
+
+    if (Math.abs(value) >= 1000 || Math.abs(value) < 0.01) {
+      return value.toExponential(1); // e.g. "2.3e-4"
+    }
+
+    // Show at most 2 decimal places
+    return parseFloat(value.toFixed(2)).toString();
+  }}
+  contentInset={{ left: 20, right: 20 }}
+  svg={{ fontSize: 10, fill: '#666' }}
+/>
           </View>
         </View>
       </ScrollView>
