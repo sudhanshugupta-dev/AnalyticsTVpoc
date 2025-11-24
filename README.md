@@ -1,79 +1,72 @@
-# Expo Router TV demo 👋
+# Expo Router TV Analytics POC 👋
 
 ![Apple TV screen shot](https://github.com/douglowder/examples/assets/6577821/a881466f-a7a0-4c66-b1fc-33235c466997)
 ![Android TV screen shot](https://github.com/douglowder/examples/assets/6577821/815c8e01-8275-4cc1-bd57-b9c8bce1fb02)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A proof of concept showing cross-platform analytics dashboards (TV + mobile + web) built with [Expo](https://expo.dev), [Expo Router](https://docs.expo.dev/router/introduction), and the [React Native TV fork](https://github.com/react-native-tvos/react-native-tvos). Real-time market data is streamed from Finnhub websockets and rendered across multiple chart types.
 
-This project uses
+Loom video (analytics walkthrough): https://www.loom.com/share/98b68402e53b40ad8b78b1ca702d780f
 
-- the [React Native TV fork](https://github.com/react-native-tvos/react-native-tvos), which supports both phone (Android and iOS) and TV (Android TV and Apple TV) targets
-- the [React Native TV config plugin](https://github.com/react-native-tvos/config-tv/tree/main/packages/config-tv) to allow Expo prebuild to modify the project's native files for TV builds
+## What this POC covers
 
-## 🚀 How to use
+- Cross-platform navigation with Expo Router targeting TV-first UX (focusable cards, remote navigation).
+- Real-time trading analytics powered by the Finnhub WebSocket feed.
+- A gallery of charts (Victory + SVG) to validate rendering on large screens and touch devices.
+- Weather analytics variant to demonstrate theming and dataset swaps.
 
-- `cd` into the project
+## Analytics folder structure (high level)
 
-- For TV development:
+- `app/index.tsx` — TV-first landing page listing real-time dashboards and secondary analytics.
+- `app/MainScreen.tsx` — Classic analytics board with bar, pie, line, area, scatter, bubble, donut, and gauge charts.
+- `app/*Realtime.tsx` — Trading-focused screens (line, bar, scatter, gauge, candlestick, gantt, trade feed) that consume live Finnhub data.
+- `app/Weather*.tsx` — Weather-themed dashboards mirroring the core chart types.
+- `services/realTimeSocket.ts` — Finnhub websocket helper (subscribe/unsubscribe + message handling).
+- `data/dummy_data.ts` — Sample data for non-live charts.
+- `components/FocusableCard.tsx` — Focusable TV navigation tile used across the menus.
+
+## Chart catalog in this POC
+
+- Real-time trading: trades feed, line chart, bar (30s aggregation), scatter plot (30s), gauge set, candlestick (5s OHLC), gantt (session timeline).
+- Static analytics: bar, pie, line, stacked area, scatter, bubble, donut, gauge.
+- Weather variants: bar, pie, line, scatter, bubble, donut, gauge.
+
+## 🚀 Run on TV (main path)
 
 ```sh
 yarn
-yarn prebuild:tv # Executes clean Expo prebuild with TV modifications
-yarn ios # Build and run for Apple TV
-yarn android # Build for Android TV
-yarn web # Run the project on web from localhost
+EXPO_TV=1 yarn prebuild:tv   # enables @react-native-tvos/config-tv
+yarn ios                     # Apple TV
+yarn android                 # Android TV
+yarn web                     # local web preview
 ```
-- For mobile development:
+
+> You can also set `"isTV": true` in `app.json` instead of exporting `EXPO_TV=1`.
+
+## 📱 Run on mobile/web
 
 ```sh
 yarn
-yarn prebuild # Executes Expo prebuild with no TV modifications
-yarn ios # Build and run for iOS
-yarn android # Build for Android mobile
-yarn web # Run the project on web from localhost
+yarn prebuild
+yarn ios        # iOS
+yarn android    # Android
+yarn web        # local web preview
 ```
 
-> **_NOTE:_**
-> Setting the environment variable `EXPO_TV=1` enables the `@react-native-tvos/config-tv` plugin to modify the project for TV.
-> This can also be done by setting the parameter `isTV` to true in the `app.json`.
+## Real-time socket + Finnhub
 
-## Development
+- `services/realTimeSocket.ts` opens a websocket to `wss://ws.finnhub.io` and subscribes to a symbol list. It emits parsed trade messages to any screen via an `onMessage` callback, and returns an `unsubscribe` helper.
+- Screens such as `app/RealtimeTradeScreen.tsx`, `app/LineChartRealtime.tsx`, and `app/BarChartRealtime.tsx` supply the symbol list and render the incoming trades.
+- Provide a valid Finnhub API token before running real-time screens. Replace the placeholder token strings in `services/realTimeSocket.ts` and `app/RealtimeTradeScreen.tsx` (or wire an env loader) with your token.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Development notes
 
-This project includes a [demo](./components/EventHandlingDemo.tsx) showing how to use React Native TV APIs to highlight controls as the user navigates the screen with the remote control.
+- Uses TV-specific Metro resolution (`*.tv.tsx`, `*.ios.tv.tsx`, `*.android.tv.tsx`) via `metro.config.js`.
+- Starter Expo commands still apply; edit screens under `app/` to iterate quickly.
+- To reset the starter example, run `npm run reset-project` (moves starter to `app-example/` and creates a blank `app/`).
 
 ## Deploy
 
 Deploy on all platforms with Expo Application Services (EAS).
 
-- Deploy the website: `npx eas-cli deploy` — [Learn more](https://docs.expo.dev/eas/hosting/get-started/)
-- Deploy on iOS and Android using: `npx eas-cli build` — [Learn more](https://expo.dev/eas)
-
-## TV specific file extensions
-
-This project includes an [example Metro configuration](./metro.config.js) that allows Metro to resolve application source files with TV-specific code, indicated by specific file extensions (`*.ios.tv.tsx`, `*.android.tv.tsx`, `*.tv.tsx`).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/learn): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Deploy the website: `npx eas-cli deploy`
+- Deploy on iOS and Android using: `npx eas-cli build`
